@@ -12,65 +12,88 @@ m = 2, n = 3
 3
 
 ## Recursive Approach
-```
+```python
 class Solution:
-    def pathsToFinish(self, i, j, m, n) -> int:
-        if i >= m or j >= n:
-            return 0
-        
-        if i == m - 1 and j == n - 1:
-            return 1
-        
-        return self.pathsToFinish(i + 1, j, m , n) + self.pathsToFinish(i, j + 1, m , n)  
-        
     def uniquePaths(self, m: int, n: int) -> int:
-        return self.pathsToFinish(0, 0, m, n);
-        
+        def dfs(r, c):
+            if r == m or c == n:
+                return 0
+            if r == m-1 or c == n-1:
+                return 1
+            return dfs(r+1, c)
+        return dfs(0, 0)
 ```
 
 ## Memoization - Top Down
-```
+```python
 class Solution:
-    def pathsToFinish(self, i, j, m, n, dp) -> int:
-        if i >= m or j >= n:
-            return 0
-        
-        if i == m - 1 and j == n - 1:
-            return 1
-        
-        if dp[i][j] != -1:
-            res = dp[i][j]
-            return res
-        
-        dp[i][j] = self.pathsToFinish(i + 1, j, m , n, dp) + self.pathsToFinish(i, j + 1, m , n, dp)  
-        res = dp[i][j]
-        return res
-        
     def uniquePaths(self, m: int, n: int) -> int:
         dp = [ [-1]*n for i in range(m)]
-        return self.pathsToFinish(0, 0, m, n, dp);
-        
+        def dfs(r, c):
+            if r == m or c == n:
+                return 0
+            if r == m-1 or c == n-1:
+                return 1
+            dp[r][c] = dfs(r+1, c)
+            return dp[r][c]
+        return dfs(0, 0)
 ```
 
-## Tabulation - Bottom Up
-```
+## Tabulation - Bottom Up - 2DP
+```python
 class Solution:
     def uniquePaths(self, m: int, n: int) -> int:
-        dp = [ [0] * n for _ in range(m) ]
-
-        for i in range(n):
-            dp[0][i] = 1
-
-        for i in range(m):
-            dp[i][0] = 1
-        
-        for i in range(1, m):
-            for j in range(1, n):
-                dp[i][j] = dp[i - 1][j] + dp[i][j - 1]
-        
-        res = dp[m - 1][n - 1]
-        return res
+        dp = [ [1] * n for _ in range(m) ]
+        for r in range(1, m):
+            for c in range(1, n):
+                dp[r][c] = dp[r - 1][c] + dp[r][c - 1]
+        return dp[m - 1][n - 1]
 ```
 
-There is only 1 way to reach all cells [0][n] & [m][0] hence mark them as 1,
-utilizing them the cells on next level below can reuse the above to reach the result.
+## Tabulation - Bottom Up - 2DP
+```python
+class Solution:
+    def uniquePaths(self, m: int, n: int) -> int:
+        dp = [1] * n
+        for _ in range(1, m):
+            for c in range(1, n):
+                dp[c] = dp[c] + dp[c-1]
+        return dp[n-1]
+```
+
+# Time & Space complexity
+
+Max number of branches per node ? 
+2
+
+Max depth of the recursion tree?
+- reaching from (0,0) to (m-1, n-1) - how may moves?
+m-1 + n-1 = m+n-1
+
+
+time complexity formula = (no of branches)^(max depth of recursion)
+
+
+**Recursive Approach**
+T = O(2^(m+n))
+S = O(m+n) 
+    - maximum size of recursion stack
+
+**Memoization approach**
+T = O(m*n)
+    - each state is computed once and used from cache
+S = O(m*n) + recursion stack
+    - cache-states + recursion-stack
+
+**2DP Tabulation approach**
+T = O(m*n)
+    - each cell is visited once
+S = O(m*n)
+    - grid size
+
+**1DP Tabulation approach**
+T = O(m*n)
+    - each cell is visited once
+S = O(n)
+    - size of 1D array
+
